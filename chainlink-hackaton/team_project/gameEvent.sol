@@ -4,22 +4,37 @@ pragma solidity ^0.8.7;
 // 1) sets the number of tickets available for he event
 // 2) allows any user to register to the event
 
-contract eventGame {
-    // Initialize the contract with the number of tickets
+contract gameEvent {
+    // array that stores all the winners (allowed to mint tickets)
+    address[] s_winners;
     uint32 s_numerOfTickets;
+    address immutable owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
 
     constructor(uint32 _numberOfTickets) {
         s_numerOfTickets = _numberOfTickets;
+        owner = msg.sender;
     }
 
-    // Then create an address array of size s_numerOfTickets
-    address[s_numerOfTickets] s_availableTickets;
+    // Update number of tickets if necessary
+    function updateTickets(uint32 _updatedTickets)
+        external
+        onlyOwner
+        returns (bool)
+    {
+        s_numberOfTickets = _updatedTickets;
+        return true;
+    }
 
-    // address storing all the people registered + address to avoid multi-registration
+    // Registration of buyers => checks multi-registration
     address[] public registeredAddresses;
     mapping(address => bool) public isRegistered;
 
-    function register() public returns (bool) {
+    function register() external returns (bool) {
         // ensure the person have not registered
         require(
             isRegistered[msg.sender] == false,

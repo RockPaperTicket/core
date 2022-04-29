@@ -2,9 +2,11 @@ pragma solidity ^0.8.7;
 
 // This contract deploys a gameEvent contract with a set number of tickets
 
-contract eventGameFactory {
+import "./gameEvent.sol";
+
+contract eventGameFactory is gameEvent {
     // array with the addresses of deployed event games
-    eventGame[] public s_eventGames;
+    eventGame[] external s_eventGames;
 
     function createEventGame(uint32 _numberOfTickets) external returns (bool) {
         eventGame eventgame = new eventGame(_numberOfTickets);
