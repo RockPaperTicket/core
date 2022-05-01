@@ -2,7 +2,8 @@ pragma solidity ^0.8.7;
 
 // This contract
 // 1) sets the number of tickets available for he event
-// 2) allows any user to register to the event
+// 2) allows the organizer to update the available tickets
+// 3) allows any user to register to the event
 
 contract gameEvent {
     // array that stores all the winners (allowed to mint tickets)
@@ -44,5 +45,10 @@ contract gameEvent {
         registeredAddresses.push(msg.sender);
         // emit event?
         return true;
+    }
+
+    function startGame() public onlyOwner {
+        // should be owner or us¿ TBD
+        address[] storage s_participants = registeredAddress;
     }
 }
