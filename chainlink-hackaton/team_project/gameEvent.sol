@@ -47,9 +47,8 @@ contract gameEvent {
         return true;
     }
 
-    function startGame() public onlyOwner returns (bool) {
+    function startGame() public onlyOwner {
         // should be owner or us¿ TBD
         address[] storage s_participants = registeredAddress;
-        return true;
     }
 }
