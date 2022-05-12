@@ -18,7 +18,7 @@ interface eventLog {
 }
 
 contract eventGame is Ownable {
-    address public s_logAddress;
+    address immutable s_logAddress;
     uint256 s_numberOfTickets;
     bool s_registrationOpen = true;
     address immutable s_owner;
