@@ -18,10 +18,10 @@ interface eventLog {
 }
 
 contract eventGame is Ownable {
-    address immutable s_logAddress;
-    uint256 s_numberOfTickets;
-    bool s_registrationOpen = true;
-    address immutable s_owner;
+    address public immutable s_logAddress;
+    uint256 public s_numberOfTickets;
+    bool public s_registrationOpen = true;
+    address public immutable s_owner;
 
     address[] public s_registeredAddresses;
     mapping(address => bool) public s_isRegistered;
@@ -31,7 +31,7 @@ contract eventGame is Ownable {
 
     constructor(
         address _logAddress,
-        uint32 _numberOfTickets,
+        uint256 _numberOfTickets,
         address _owner
     ) {
         s_logAddress = _logAddress;
