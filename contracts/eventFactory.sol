@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 // 1) is a factory of eventGame contracts
 // 2) records every event created
 
-import "https://github.com/RockPaperTicket/core/blob/eventFactory/contracts/eventGame.sol";
+import "./eventGame.sol";
 
 contract eventFactory {
     address immutable s_logAddress;
