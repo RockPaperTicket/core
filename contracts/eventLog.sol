@@ -8,16 +8,16 @@ contract eventLog {
     struct Event {
         address eventGameAddress;
         address eventOwner;
-        uint32 numberOfTickets;
-        uint32 ticketPrice;
+        uint256 numberOfTickets;
+        uint256 ticketPrice;
     }
 
     function _logEvent(
         string memory _eventName,
         address _eventGameAddress,
         address _eventOwner,
-        uint32 _numberOfTickets,
-        uint32 _ticketPrice
+        uint256 _numberOfTickets,
+        uint256 _ticketPrice
     ) public {
         Event memory newEvent = Event(
             _eventGameAddress,

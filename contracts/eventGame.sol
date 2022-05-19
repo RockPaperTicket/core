@@ -8,18 +8,18 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface eventLog {
-function _logEvent(
+    function _logEvent(
         string memory _eventName,
         address _eventGameAddress,
         address _eventOwner,
         uint256 _numberOfTickets,
         uint256 _ticketPrice
-    ) external;    
-    function _addWinner (string calldata _eventName, address _winner) external;
+    ) external;
+
+    function _addWinner(string calldata _eventName, address _winner) external;
 }
 
 contract eventGame is Ownable {
-
     // event-related variables
     struct Event {
         address eventGameAddress;
@@ -38,17 +38,25 @@ contract eventGame is Ownable {
     mapping(address => bool) public s_isRegistered;
     mapping(address => userScore) scoreboard;
     struct userScore {
-        uint256 points ;
+        uint256 points;
         uint256 numberOfPlays;
         uint256 timeElapsed;
     }
 
     // game-related variables
-    enum possiblePlays {paper, rock, scissors}
-    event result (address player, string result, uint256 points);
+    enum possiblePlays {
+        paper,
+        rock,
+        scissors
+    }
+    event result(address player, string result, uint256 points);
 
-
-    constructor(string memory _eventName, address _logAddress, uint256 _numberOfTickets, address _owner) {
+    constructor(
+        string memory _eventName,
+        address _logAddress,
+        uint256 _numberOfTickets,
+        address _owner
+    ) {
         s_eventName = _eventName;
         s_logAddress = _logAddress;
         s_numberOfTickets = _numberOfTickets;
@@ -56,72 +64,92 @@ contract eventGame is Ownable {
     }
 
     // updates the event details
-    function updateEvent(string memory _newName, uint32 _newTickets, uint32 _newPrice) external onlyOwner {
+    function updateEvent(
+        string memory _newName,
+        uint256 _newTickets,
+        uint256 _newPrice
+    ) external onlyOwner {
         eventLog log = eventLog(s_logAddress);
-        log._logEvent (_newName, address(this), msg.sender, _newTickets, _newPrice);
+        log._logEvent(
+            _newName,
+            address(this),
+            msg.sender,
+            _newTickets,
+            _newPrice
+        );
         s_numberOfTickets = _newTickets;
     }
-
 
     // Registration of buyers => checks multi-registration
     function register() external {
         require(s_registrationOpen == true, "Registration not open yet!"); // ensure registration is open
-        require(s_isRegistered[msg.sender] == false, "You have already registered!"); // ensure the person have not registered
-        userScore memory initialUserScore = userScore(0,0, block.timestamp);
+        require(
+            s_isRegistered[msg.sender] == false,
+            "You have already registered!"
+        ); // ensure the person have not registered
+        userScore memory initialUserScore = userScore(0, 0, block.timestamp);
         scoreboard[msg.sender] = initialUserScore;
         s_registeredAddresses.push(msg.sender);
         s_isRegistered[msg.sender] = true;
     }
 
     function _closeRegistration() private {
-        if (s_registrationOpen == true){
+        if (s_registrationOpen == true) {
             s_registrationOpen = false;
         }
     }
-    
-    function userPlay (uint256 _play) public {
+
+    function userPlay(uint256 _play) public {
         require(s_isRegistered[msg.sender] == true);
-        require (scoreboard[msg.sender].numberOfPlays <= 5);
+        require(scoreboard[msg.sender].numberOfPlays <= 5);
         possiblePlays algoPlay = _getAlgoPlay();
-        if (possiblePlays(_play) == algoPlay){
-            emit result (msg.sender, "draw", 1);
+        if (possiblePlays(_play) == algoPlay) {
+            emit result(msg.sender, "draw", 1);
             scoreboard[msg.sender].points += 1;
-        }
-        else if (possiblePlays(_play) == possiblePlays(0) && algoPlay == possiblePlays(1)){
-            emit result (msg.sender, "loss", 0);
-        }
-        else if (possiblePlays(_play) == possiblePlays(0) && algoPlay == possiblePlays(2)){
-            emit result (msg.sender, "win", 3);
+        } else if (
+            possiblePlays(_play) == possiblePlays(0) &&
+            algoPlay == possiblePlays(1)
+        ) {
+            emit result(msg.sender, "loss", 0);
+        } else if (
+            possiblePlays(_play) == possiblePlays(0) &&
+            algoPlay == possiblePlays(2)
+        ) {
+            emit result(msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
-        }
-        else if (possiblePlays(_play) == possiblePlays(1) && algoPlay == possiblePlays(0)){
-            emit result (msg.sender, "win", 3);
+        } else if (
+            possiblePlays(_play) == possiblePlays(1) &&
+            algoPlay == possiblePlays(0)
+        ) {
+            emit result(msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
-        }
-        else if (possiblePlays(_play) == possiblePlays(1) && algoPlay == possiblePlays(2)){
-            emit result (msg.sender, "loss", 0);
-        }
-        else if (possiblePlays(_play) == possiblePlays(2) && algoPlay == possiblePlays(0)){
-            emit result (msg.sender, "loss", 0);
-        }
-        else {
-            emit result (msg.sender, "win", 3);
+        } else if (
+            possiblePlays(_play) == possiblePlays(1) &&
+            algoPlay == possiblePlays(2)
+        ) {
+            emit result(msg.sender, "loss", 0);
+        } else if (
+            possiblePlays(_play) == possiblePlays(2) &&
+            algoPlay == possiblePlays(0)
+        ) {
+            emit result(msg.sender, "loss", 0);
+        } else {
+            emit result(msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
         }
         scoreboard[msg.sender].numberOfPlays += 1;
         scoreboard[msg.sender].timeElapsed += block.timestamp;
     }
 
-    function _getAlgoPlay() private pure returns (possiblePlays){
+    function _getAlgoPlay() private pure returns (possiblePlays) {
         uint256 randomNum = _getRandomNumber();
         possiblePlays algoPlay = possiblePlays(randomNum);
         return algoPlay;
     }
 
-    function _getRandomNumber() private pure returns (uint256){
+    function _getRandomNumber() private pure returns (uint256) {
         // chainlink VRF
         uint256 randomNumber = 0;
         return randomNumber;
     }
-
 }

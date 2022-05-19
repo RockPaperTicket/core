@@ -16,8 +16,8 @@ contract eventFactory {
     // deploy a new contract for the event and log it
     function createEventGame(
         string memory _eventName,
-        uint32 _numberOfTickets,
-        uint32 _ticketPrice
+        uint256 _numberOfTickets,
+        uint256 _ticketPrice
     ) external {
         eventLog log = eventLog(s_logAddress);
         eventGame game = new eventGame(
