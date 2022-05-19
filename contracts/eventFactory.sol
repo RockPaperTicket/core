@@ -21,6 +21,7 @@ contract eventFactory {
     ) external {
         eventLog log = eventLog(s_logAddress);
         eventGame game = new eventGame(
+            _eventName,
             s_logAddress,
             _numberOfTickets,
             msg.sender

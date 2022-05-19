@@ -18,7 +18,7 @@ contract eventLog {
         address _eventOwner,
         uint32 _numberOfTickets,
         uint32 _ticketPrice
-    ) public returns (Event memory) {
+    ) public {
         Event memory newEvent = Event(
             _eventGameAddress,
             _eventOwner,
