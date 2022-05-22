@@ -8,11 +8,11 @@ import "./eventGame.sol";
 
 contract eventFactory {
     address immutable s_logAddress;
-    uint256 s_numberOfEvents;
+    uint256 s_nextId;
 
     constructor(address _logAddress) {
         s_logAddress = _logAddress;
-        s_numberOfEvents = 0;
+        s_nextId = 0;
     }
 
     // deploy a new contract for the event and log it
@@ -22,18 +22,15 @@ contract eventFactory {
         uint256 _ticketPrice
     ) external {
         eventLog log = eventLog(s_logAddress);
-        eventGame game = new eventGame(
-            s_logAddress,
-            msg.sender,
-            s_numberOfEvents
-        );
+        eventGame game = new eventGame(s_logAddress, msg.sender, s_nextId);
         log._logEvent(
+            s_nextId,
             address(game),
             msg.sender,
             _eventName,
             _numberOfTickets,
             _ticketPrice
         );
-        s_numberOfEvents += 1;
+        s_nextId += 1;
     }
 }

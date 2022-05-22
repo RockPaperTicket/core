@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface eventLog {
     function _logEvent(
+        uint256 _eventId,
         address _eventGameAddress,
         address _eventOwner,
         string memory _eventName,
