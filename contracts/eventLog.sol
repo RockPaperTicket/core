@@ -30,7 +30,7 @@ contract eventLog {
         string memory _eventName,
         uint256 _numberOfTickets,
         uint256 _ticketPrice
-    ) public {
+    ) external {
         s_events[s_eventId] = Event(
             _eventGameAddress,
             _eventOwner,
