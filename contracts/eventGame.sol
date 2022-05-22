@@ -9,31 +9,44 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface eventLog {
     function _logEvent(
-        string memory _eventName,
         address _eventGameAddress,
         address _eventOwner,
+        string memory _eventName,
         uint256 _numberOfTickets,
         uint256 _ticketPrice
     ) external;
 
-    function _addWinner(string calldata _eventName, address _winner) external;
+    function _addWinner(uint256 _eventId, address _winner) external;
+
+    function _updateName(uint256 _eventId, string memory _newName) external;
+
+    function _updateTickets(uint256 _eventId, uint256 _newTickets) external;
+
+    function _updatePrice(uint256 _eventId, uint256 _newPrice) external;
+
+    function _closeEvent(uint256 _eventId) external;
 }
 
 contract eventGame is Ownable {
-    // event-related variables
-    struct Event {
-        address eventGameAddress;
-        address eventOwner;
-        uint256 numberOfTickets;
-        uint256 ticketPrice;
-    }
+    // constant variables since the creation of the event
     address immutable s_logAddress;
-    uint256 s_numberOfTickets;
-    bool s_registrationOpen = true;
     address immutable s_owner;
-    string s_eventName;
+    uint256 immutable s_eventId;
 
-    // user-related variables
+    // constructor that defines all variables described above
+    constructor(
+        address _logAddress,
+        address _owner,
+        uint256 _eventId
+    ) {
+        // definition of constant variables
+        s_logAddress = _logAddress;
+        s_owner = _owner;
+        s_eventId = _eventId;
+    }
+
+    // registration and user-related variables
+    bool s_registrationOpen = true;
     address[] public s_registeredAddresses;
     mapping(address => bool) public s_isRegistered;
     mapping(address => userScore) scoreboard;
@@ -49,39 +62,29 @@ contract eventGame is Ownable {
         rock,
         scissors
     }
+
+    // emission of events for each play result
     event result(address player, string result, uint256 points);
 
-    constructor(
-        string memory _eventName,
-        address _logAddress,
-        uint256 _numberOfTickets,
-        address _owner
-    ) {
-        s_eventName = _eventName;
-        s_logAddress = _logAddress;
-        s_numberOfTickets = _numberOfTickets;
-        s_owner = _owner;
+    // updates the event details
+
+    function updateName(string memory _newName) public onlyOwner {
+        eventLog log = eventLog(s_logAddress);
+        log._updateName(s_eventId, _newName);
     }
 
-    // updates the event details
-    function updateEvent(
-        string memory _newName,
-        uint256 _newTickets,
-        uint256 _newPrice
-    ) external onlyOwner {
+    function updateTickets(uint256 _newTickets) public onlyOwner {
         eventLog log = eventLog(s_logAddress);
-        log._logEvent(
-            _newName,
-            address(this),
-            msg.sender,
-            _newTickets,
-            _newPrice
-        );
-        s_numberOfTickets = _newTickets;
+        log._updateTickets(s_eventId, _newTickets);
+    }
+
+    function updatePrice(uint256 _newPrice) public onlyOwner {
+        eventLog log = eventLog(s_logAddress);
+        log._updatePrice(s_eventId, _newPrice);
     }
 
     // Registration of buyers => checks multi-registration
-    function register() external {
+    function register() public {
         require(s_registrationOpen == true, "Registration not open yet!"); // ensure registration is open
         require(
             s_isRegistered[msg.sender] == false,
@@ -93,11 +96,20 @@ contract eventGame is Ownable {
         s_isRegistered[msg.sender] = true;
     }
 
+    function startGame() public {
+        _closeRegistration;
+        _createGroups;
+    }
+
     function _closeRegistration() private {
         if (s_registrationOpen == true) {
             s_registrationOpen = false;
         }
+        eventLog log = eventLog(s_logAddress);
+        log._closeEvent(s_eventId);
     }
+
+    function _createGroups() private {}
 
     function userPlay(uint256 _play) public {
         require(s_isRegistered[msg.sender] == true);
