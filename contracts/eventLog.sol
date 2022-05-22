@@ -70,7 +70,7 @@ contract eventLog {
 
     function getOpenEvents() public view returns (Event[] memory) {
         Event[] memory openEvents;
-        for (uint256 i; i < s_eventId + 1; i++) {
+        for (uint256 i; i < s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
                 openEvents.push(s_events[i]);
             }
