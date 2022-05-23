@@ -12,7 +12,7 @@ contract eventFactory {
 
     constructor(address _logAddress) {
         s_logAddress = _logAddress;
-        s_nextId = 0;
+        s_nextId = 1;
     }
 
     // deploy a new contract for the event and log it

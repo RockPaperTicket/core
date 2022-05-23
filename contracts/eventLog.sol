@@ -9,8 +9,8 @@ contract eventLog {
     mapping(uint256 => Event) s_events; // s_eventId => Event
 
     // every user events are stored as userAddress => Event
-    mapping(address => Event[]) s_registeredEvents;
-    mapping(address => Event[]) s_createdEvents;
+    mapping(address => uint256[]) s_registeredEvents;
+    mapping(address => uint256[]) s_createdEvents;
 
     // the winners of each event are stored as s_eventId => userAddress => true
     mapping(uint256 => mapping(address => bool)) s_winners;
@@ -69,10 +69,20 @@ contract eventLog {
     }
 
     function getOpenEvents() public view returns (Event[] memory) {
-        Event[] memory openEvents;
-        for (uint256 i; i < s_numberOfEvents; i++) {
+        uint256 availableLength = 0;
+        for (uint256 i = 0; i < s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
-                openEvents.push(s_events[i]);
+                availableLength += 1;
+            }
+        }
+
+        uint256 currentIndex = 0;
+        Event[] memory openEvents = new Event[](availableLength);
+        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+            if (s_events[i].isOpen == true) {
+                Event storage currentItem = s_events[i];
+                openEvents[currentIndex] = currentItem;
+                currentIndex += 1;
             }
         }
         return openEvents;
