@@ -9,8 +9,9 @@ contract eventLog {
     mapping(uint256 => Event) s_events; // s_eventId => Event
 
     // every user events are stored as userAddress => Event
-    mapping(address => Event[]) s_registeredEvents;
-    mapping(address => Event[]) s_createdEvents;
+    // Instead of storing Event struct we can store eventId. That'll reduce the cost
+    mapping(address => uint256[]) s_registeredEvents;
+    mapping(address => uint256[]) s_createdEvents;
 
     // the winners of each event are stored as s_eventId => userAddress => true
     mapping(uint256 => mapping(address => bool)) s_winners;
