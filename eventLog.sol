@@ -2,14 +2,13 @@ pragma solidity 0.8.4;
 
 //This contract is a log of the created events
 
-contract eventLog {
+contract EventLog {
     // all events ever created are stored in these structures
     uint256 s_numberOfEvents;
-    uint256[] s_eventIds;
     mapping(uint256 => Event) s_events; // s_eventId => Event
+    mapping(uint256 => uint256) numberOfUsersRegistered;
 
     // every user events are stored as userAddress => Event
-    // Instead of storing Event struct we can store eventId. That'll reduce the cost
     mapping(address => uint256[]) s_registeredEvents;
     mapping(address => uint256[]) s_createdEvents;
 
@@ -22,6 +21,15 @@ contract eventLog {
         string eventName;
         uint256 numberOfTickets;
         uint256 ticketPrice;
+        bool isOpen;
+    }
+    struct EventWithTotalNumber {
+        address eventGameAddress;
+        address eventOwner;
+        string eventName;
+        uint256 numberOfTickets;
+        uint256 ticketPrice;
+        uint256 totalUsers;
         bool isOpen;
     }
 
@@ -46,55 +54,105 @@ contract eventLog {
             true
         );
         s_numberOfEvents += 1;
-        s_eventIds.push(_eventId);
-    }
-    modifier onlyOwner(uint256 _eventId) {
-        Event memory old_event = s_events[_eventId];
-        require(old_event.eventOwner == msg.sender, "Only owner can update");
-        _;
     }
 
-    function _updateName(uint256 _eventId, string memory _newName) onlyOwner(_eventId) external {
+    function _updateName(uint256 _eventId, string memory _newName) external {
         s_events[_eventId].eventName = _newName;
     }
 
-    function _updateTickets(uint256 _eventId, uint256 _newTickets) onlyOwner(_eventId) external {
+    function _updateTickets(uint256 _eventId, uint256 _newTickets) external {
         s_events[_eventId].numberOfTickets = _newTickets;
     }
 
-    function _updatePrice(uint256 _eventId, uint256 _newPrice) onlyOwner(_eventId) external {
+    function _updatePrice(uint256 _eventId, uint256 _newPrice) external {
         s_events[_eventId].ticketPrice = _newPrice;
     }
 
-    function _closeEvent(uint256 _eventId) onlyOwner(_eventId) external {
+    function _closeEvent(uint256 _eventId) external {
         s_events[_eventId].isOpen = false;
     }
 
-    function getEvent(uint256 _eventId) public view returns (Event memory) {
-        return s_events[_eventId];
+    function getEventAddress(uint256 _eventId) public view returns (address) {
+        return s_events[_eventId].eventGameAddress;
     }
 
     function getOpenEvents() public view returns (Event[] memory) {
         uint256 availableLength = 0;
-        for (uint256 i = 0; i < s_numberOfEvents; i++){
-                    if (s_events[i].isOpen == true){
-                        availableLength += 1;
-                    }
+        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+            if (s_events[i].isOpen == true) {
+                availableLength += 1;
+            }
         }
 
-        uint256 currentIndex = 0;
         Event[] memory openEvents = new Event[](availableLength);
-        for (uint256 i = 0; i < s_numberOfEvents; i++){
-                    if (s_events[i].isOpen == true){
-                        Event storage currentItem = s_events[i];
-                        openEvents[currentIndex] = currentItem;
-                        currentIndex += 1;
-                    }
+        uint256 currentIndex = 0;
+        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+            if (s_events[i].isOpen == true) {
+                openEvents[currentIndex] = s_events[i];
+                currentIndex += 1;
+            }
         }
         return openEvents;
     }
 
+    function _addRegisteredEvent(address _userAddress, uint256 _eventId)
+        external
+    {
+        //this visibility must be protected
+        s_registeredEvents[_userAddress].push(_eventId);
+        numberOfUsersRegistered[_eventId] += 1;
+    }
+
+    function getRegisteredEvents(address _userAddress)
+        public
+        view
+        returns (Event[] memory)
+    {
+        uint256[] memory registeredEvents = s_registeredEvents[_userAddress];
+        uint256 availableLength = registeredEvents.length;
+        Event[] memory registeredEventsStruct = new Event[](availableLength);
+        for (uint256 i = 0; i < availableLength; i++) {
+            uint256 eventId = registeredEvents[i];
+            Event memory newEvent = s_events[eventId];
+            registeredEventsStruct[i] = newEvent;
+        }
+        return registeredEventsStruct;
+    }
+
+    function _addCreatedEvent(address _userAddress, uint256 _eventId) external {
+        //this visibility must be protected
+        s_createdEvents[_userAddress].push(_eventId);
+    }
+
+    function getCreatedEvents()
+        public
+        view
+        returns (EventWithTotalNumber[] memory)
+    {
+        uint256[] memory createdEvents = s_createdEvents[msg.sender];
+        uint256 availableLength = createdEvents.length;
+        EventWithTotalNumber[] memory createdEventsStruct = new EventWithTotalNumber[](availableLength);
+        for (uint256 i = 0; i < availableLength; i++) {
+            uint256 eventId = createdEvents[i];
+            Event memory newEvent = s_events[eventId];
+            EventWithTotalNumber memory newCreatedEvent = EventWithTotalNumber(
+                {
+                    eventGameAddress: newEvent.eventGameAddress,
+                    eventOwner: newEvent.eventOwner,
+                    eventName: newEvent.eventName,
+                    numberOfTickets: newEvent.numberOfTickets,
+                    ticketPrice: newEvent.ticketPrice,
+                    isOpen: newEvent.isOpen,
+                    totalUsers: numberOfUsersRegistered[eventId]
+                }
+            );
+            createdEventsStruct[i] = newCreatedEvent;
+        }
+        return createdEventsStruct;
+    }
+
     function _addWinner(uint256 _eventId, address _winner) external {
+        //this visibility must be protected
         s_winners[_eventId][_winner] = true;
     }
 }
