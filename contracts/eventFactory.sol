@@ -20,7 +20,7 @@ contract EventFactory {
         string memory _eventName,
         uint256 _numberOfTickets,
         uint256 _ticketPrice
-    ) external {
+    ) external returns (address) {
         eventLog log = eventLog(s_logAddress);
         EventGame game = new EventGame(s_logAddress, msg.sender, s_nextId);
         log._logEvent(

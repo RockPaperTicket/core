@@ -2,9 +2,7 @@ pragma solidity 0.8.4;
 
 //This contract is a log of the created events
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-contract EventLog is Ownable {
+contract EventLog {
     // all events ever created are stored in these structures
     uint256 s_numberOfEvents;
     uint256[] s_eventIds;
@@ -50,33 +48,24 @@ contract EventLog is Ownable {
         s_eventIds.push(_eventId);
     }
 
-    function _updateName(uint256 _eventId, string memory _newName)
-        external
-        onlyOwner
-    {
+    function _updateName(uint256 _eventId, string memory _newName) external {
         s_events[_eventId].eventName = _newName;
     }
 
-    function _updateTickets(uint256 _eventId, uint256 _newTickets)
-        external
-        onlyOwner
-    {
+    function _updateTickets(uint256 _eventId, uint256 _newTickets) external {
         s_events[_eventId].numberOfTickets = _newTickets;
     }
 
-    function _updatePrice(uint256 _eventId, uint256 _newPrice)
-        external
-        onlyOwner
-    {
+    function _updatePrice(uint256 _eventId, uint256 _newPrice) external {
         s_events[_eventId].ticketPrice = _newPrice;
     }
 
-    function _closeEvent(uint256 _eventId) external onlyOwner {
+    function _closeEvent(uint256 _eventId) external {
         s_events[_eventId].isOpen = false;
     }
 
-    function getEvent(uint256 _eventId) public view returns (Event memory) {
-        return s_events[_eventId];
+    function getEventAddress(uint256 _eventId) public view returns (address) {
+        return s_events[_eventId].eventGameAddress;
     }
 
     function getOpenEvents() public view returns (Event[] memory) {

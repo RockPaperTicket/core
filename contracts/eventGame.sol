@@ -5,8 +5,6 @@ pragma solidity 0.8.4;
 // 3) allows any user to register to the event
 // 4) allows the organizer to start the game
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
 interface eventLog {
     function _logEvent(
         uint256 _eventId,
@@ -33,11 +31,16 @@ interface eventLog {
     function _addCreatedEvent(address _userAddress, uint256 _eventId) external;
 }
 
-contract EventGame is Ownable {
+contract EventGame {
     // constant variables since the creation of the event
     address immutable s_logAddress;
     address immutable s_owner;
     uint256 immutable s_eventId;
+
+    modifier onlyOwner() {
+        require(msg.sender == s_owner);
+        _;
+    }
 
     // constructor that defines all variables described above
     constructor(
@@ -73,6 +76,10 @@ contract EventGame is Ownable {
     event result(address player, string result, uint256 points);
 
     // updates the event details
+
+    function test() public view onlyOwner returns (string memory) {
+        return "hello";
+    }
 
     function updateName(string memory _newName) public onlyOwner {
         eventLog log = eventLog(s_logAddress);
