@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract eventLog {
+contract EventLog is Ownable {
     // all events ever created are stored in these structures
     uint256 s_numberOfEvents;
     uint256[] s_eventIds;
@@ -87,16 +87,59 @@ contract eventLog {
             }
         }
 
-        uint256 currentIndex = 0;
         Event[] memory openEvents = new Event[](availableLength);
+        uint256 currentIndex = 0;
         for (uint256 i = 0; i < s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
-                Event storage currentItem = s_events[i];
-                openEvents[currentIndex] = currentItem;
+                openEvents[currentIndex] = s_events[i];
                 currentIndex += 1;
             }
         }
         return openEvents;
+    }
+
+    function _addRegisteredEvent(address _userAddress, uint256 _eventId)
+        external
+    {
+        //this visibility must be protected
+        s_registeredEvents[_userAddress].push(_eventId);
+    }
+
+    function getRegisteredEvents(address _userAddress)
+        public
+        view
+        returns (Event[] memory)
+    {
+        uint256[] memory registeredEvents = s_registeredEvents[_userAddress];
+        uint256 availableLength = registeredEvents.length;
+        Event[] memory registeredEventsStruct = new Event[](availableLength);
+        for (uint256 i = 0; i < availableLength; i++) {
+            uint256 eventId = registeredEvents[i];
+            Event memory newEvent = s_events[eventId];
+            registeredEventsStruct[i] = newEvent;
+        }
+        return registeredEventsStruct;
+    }
+
+    function _addCreatedEvent(address _userAddress, uint256 _eventId) external {
+        //this visibility must be protected
+        s_createdEvents[_userAddress].push(_eventId);
+    }
+
+    function getCreatedEvents(address _userAddress)
+        public
+        view
+        returns (Event[] memory)
+    {
+        uint256[] memory createdEvents = s_createdEvents[_userAddress];
+        uint256 availableLength = createdEvents.length;
+        Event[] memory createdEventsStruct = new Event[](availableLength);
+        for (uint256 i = 0; i < availableLength; i++) {
+            uint256 eventId = createdEvents[i];
+            Event memory newEvent = s_events[eventId];
+            createdEventsStruct[i] = newEvent;
+        }
+        return createdEventsStruct;
     }
 
     function _addWinner(uint256 _eventId, address _winner) external {

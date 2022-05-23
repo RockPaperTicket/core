@@ -6,7 +6,7 @@ pragma solidity 0.8.4;
 
 import "./eventGame.sol";
 
-contract eventFactory {
+contract EventFactory {
     address immutable s_logAddress;
     uint256 s_nextId;
 
@@ -22,7 +22,7 @@ contract eventFactory {
         uint256 _ticketPrice
     ) external {
         eventLog log = eventLog(s_logAddress);
-        eventGame game = new eventGame(s_logAddress, msg.sender, s_nextId);
+        EventGame game = new EventGame(s_logAddress, msg.sender, s_nextId);
         log._logEvent(
             s_nextId,
             address(game),
@@ -31,6 +31,7 @@ contract eventFactory {
             _numberOfTickets,
             _ticketPrice
         );
+        log._addCreatedEvent(msg.sender, s_nextId);
         s_nextId += 1;
     }
 }

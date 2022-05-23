@@ -26,9 +26,14 @@ interface eventLog {
     function _updatePrice(uint256 _eventId, uint256 _newPrice) external;
 
     function _closeEvent(uint256 _eventId) external;
+
+    function _addRegisteredEvent(address _userAddress, uint256 _eventId)
+        external;
+
+    function _addCreatedEvent(address _userAddress, uint256 _eventId) external;
 }
 
-contract eventGame is Ownable {
+contract EventGame is Ownable {
     // constant variables since the creation of the event
     address immutable s_logAddress;
     address immutable s_owner;
@@ -95,6 +100,8 @@ contract eventGame is Ownable {
         scoreboard[msg.sender] = initialUserScore;
         s_registeredAddresses.push(msg.sender);
         s_isRegistered[msg.sender] = true;
+        eventLog log = eventLog(s_logAddress);
+        log._addRegisteredEvent(msg.sender, s_eventId);
     }
 
     function startGame() public {
