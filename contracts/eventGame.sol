@@ -5,7 +5,7 @@ pragma solidity 0.8.4;
 // 3) allows any user to register to the event
 // 4) allows the organizer to start the game
 
-interface eventLog {
+interface EventLog {
     function _logEvent(
         uint256 _eventId,
         address _eventGameAddress,
@@ -58,18 +58,18 @@ contract EventGame {
     bool s_registrationOpen = true;
     address[] public s_registeredAddresses;
     mapping(address => bool) public s_isRegistered;
-    mapping(address => userScore) scoreboard;
-    struct userScore {
+    mapping(address => UserScore) public scoreboard;
+    struct UserScore {
         uint256 points;
         uint256 numberOfPlays;
         uint256 timeElapsed;
     }
 
     // game-related variables
-    enum possiblePlays {
-        paper,
-        rock,
-        scissors
+    enum PossiblePlays {
+        Paper,
+        Rock,
+        Scissors
     }
 
     // emission of events for each play result
@@ -82,17 +82,17 @@ contract EventGame {
     }
 
     function updateName(string memory _newName) public onlyOwner {
-        eventLog log = eventLog(s_logAddress);
+        EventLog log = EventLog(s_logAddress);
         log._updateName(s_eventId, _newName);
     }
 
     function updateTickets(uint256 _newTickets) public onlyOwner {
-        eventLog log = eventLog(s_logAddress);
+        EventLog log = EventLog(s_logAddress);
         log._updateTickets(s_eventId, _newTickets);
     }
 
     function updatePrice(uint256 _newPrice) public onlyOwner {
-        eventLog log = eventLog(s_logAddress);
+        EventLog log = EventLog(s_logAddress);
         log._updatePrice(s_eventId, _newPrice);
     }
 
@@ -103,11 +103,11 @@ contract EventGame {
             s_isRegistered[msg.sender] == false,
             "You have already registered!"
         ); // ensure the person have not registered
-        userScore memory initialUserScore = userScore(0, 0, block.timestamp);
+        UserScore memory initialUserScore = UserScore(0, 0, block.timestamp);
         scoreboard[msg.sender] = initialUserScore;
         s_registeredAddresses.push(msg.sender);
         s_isRegistered[msg.sender] = true;
-        eventLog log = eventLog(s_logAddress);
+        EventLog log = EventLog(s_logAddress);
         log._addRegisteredEvent(msg.sender, s_eventId);
     }
 
@@ -120,44 +120,45 @@ contract EventGame {
         if (s_registrationOpen == true) {
             s_registrationOpen = false;
         }
-        eventLog log = eventLog(s_logAddress);
+        EventLog log = EventLog(s_logAddress);
         log._closeEvent(s_eventId);
     }
 
     function _createGroups() private {}
 
     function userPlay(uint256 _play) public {
+        require(s_registrationOpen == false);
         require(s_isRegistered[msg.sender] == true);
         require(scoreboard[msg.sender].numberOfPlays <= 5);
-        possiblePlays algoPlay = _getAlgoPlay();
-        if (possiblePlays(_play) == algoPlay) {
+        PossiblePlays algoPlay = _getAlgoPlay();
+        if (PossiblePlays(_play) == algoPlay) {
             emit result(msg.sender, "draw", 1);
             scoreboard[msg.sender].points += 1;
         } else if (
-            possiblePlays(_play) == possiblePlays(0) &&
-            algoPlay == possiblePlays(1)
+            PossiblePlays(_play) == PossiblePlays(0) &&
+            algoPlay == PossiblePlays(1)
         ) {
             emit result(msg.sender, "loss", 0);
         } else if (
-            possiblePlays(_play) == possiblePlays(0) &&
-            algoPlay == possiblePlays(2)
+            PossiblePlays(_play) == PossiblePlays(0) &&
+            algoPlay == PossiblePlays(2)
         ) {
             emit result(msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
         } else if (
-            possiblePlays(_play) == possiblePlays(1) &&
-            algoPlay == possiblePlays(0)
+            PossiblePlays(_play) == PossiblePlays(1) &&
+            algoPlay == PossiblePlays(0)
         ) {
             emit result(msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
         } else if (
-            possiblePlays(_play) == possiblePlays(1) &&
-            algoPlay == possiblePlays(2)
+            PossiblePlays(_play) == PossiblePlays(1) &&
+            algoPlay == PossiblePlays(2)
         ) {
             emit result(msg.sender, "loss", 0);
         } else if (
-            possiblePlays(_play) == possiblePlays(2) &&
-            algoPlay == possiblePlays(0)
+            PossiblePlays(_play) == PossiblePlays(2) &&
+            algoPlay == PossiblePlays(0)
         ) {
             emit result(msg.sender, "loss", 0);
         } else {
@@ -168,9 +169,9 @@ contract EventGame {
         scoreboard[msg.sender].timeElapsed += block.timestamp;
     }
 
-    function _getAlgoPlay() private pure returns (possiblePlays) {
+    function _getAlgoPlay() private pure returns (PossiblePlays) {
         uint256 randomNum = _getRandomNumber();
-        possiblePlays algoPlay = possiblePlays(randomNum);
+        PossiblePlays algoPlay = PossiblePlays(randomNum);
         return algoPlay;
     }
 
