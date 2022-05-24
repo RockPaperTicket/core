@@ -59,14 +59,17 @@ contract EventLog {
     }
 
     function _updateName(uint256 _eventId, string memory _newName) external {
+        require(msg.sender == s_events[_eventId].eventGameAddress);
         s_events[_eventId].eventName = _newName;
     }
 
     function _updateTickets(uint256 _eventId, uint256 _newTickets) external {
+        require(msg.sender == s_events[_eventId].eventGameAddress);
         s_events[_eventId].numberOfTickets = _newTickets;
     }
 
     function _updatePrice(uint256 _eventId, uint256 _newPrice) external {
+        require(msg.sender == s_events[_eventId].eventGameAddress);
         s_events[_eventId].ticketPrice = _newPrice;
     }
 
