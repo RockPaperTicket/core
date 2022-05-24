@@ -21,6 +21,7 @@ contract EventLog {
         string eventName;
         uint256 numberOfTickets;
         uint256 ticketPrice;
+        uint256 totalUsers;
         bool isOpen;
     }
 
@@ -42,6 +43,7 @@ contract EventLog {
             _eventName,
             _numberOfTickets,
             _ticketPrice,
+            0,
             true
         );
         s_numberOfEvents += 1;
@@ -70,7 +72,7 @@ contract EventLog {
 
     function getOpenEvents() public view returns (Event[] memory) {
         uint256 availableLength = 0;
-        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+        for (uint256 i = 1; i <= s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
                 availableLength += 1;
             }
@@ -78,7 +80,7 @@ contract EventLog {
 
         Event[] memory openEvents = new Event[](availableLength);
         uint256 currentIndex = 0;
-        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+        for (uint256 i = 1; i <= s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
                 openEvents[currentIndex] = s_events[i];
                 currentIndex += 1;
@@ -92,6 +94,7 @@ contract EventLog {
     {
         //this visibility must be protected
         s_registeredEvents[_userAddress].push(_eventId);
+        s_events[_eventId].totalUsers += 1;
     }
 
     function getRegisteredEvents(address _userAddress)

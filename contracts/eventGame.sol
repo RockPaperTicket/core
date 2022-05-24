@@ -66,6 +66,7 @@ contract EventGame {
     }
 
     // game-related variables
+    uint256 timeLimit;
     enum PossiblePlays {
         Paper,
         Rock,
@@ -73,7 +74,12 @@ contract EventGame {
     }
 
     // emission of events for each play result
-    event result(address player, string result, uint256 points);
+    event result(
+        address indexed gameAddress,
+        address indexed player,
+        string result,
+        uint256 points
+    );
 
     // updates the event details
 
@@ -113,6 +119,7 @@ contract EventGame {
 
     function startGame() public {
         _closeRegistration;
+        timeLimit = block.timestamp + 1000000000000000;
         _createGroups;
     }
 
@@ -127,42 +134,45 @@ contract EventGame {
     function _createGroups() private {}
 
     function userPlay(uint256 _play) public {
+        // its called by each user FE
+
         require(s_registrationOpen == false);
         require(s_isRegistered[msg.sender] == true);
         require(scoreboard[msg.sender].numberOfPlays <= 5);
+        require(block.timestamp < timeLimit);
         PossiblePlays algoPlay = _getAlgoPlay();
         if (PossiblePlays(_play) == algoPlay) {
-            emit result(msg.sender, "draw", 1);
+            emit result(address(this), msg.sender, "draw", 1);
             scoreboard[msg.sender].points += 1;
         } else if (
             PossiblePlays(_play) == PossiblePlays(0) &&
             algoPlay == PossiblePlays(1)
         ) {
-            emit result(msg.sender, "loss", 0);
+            emit result(address(this), msg.sender, "loss", 0);
         } else if (
             PossiblePlays(_play) == PossiblePlays(0) &&
             algoPlay == PossiblePlays(2)
         ) {
-            emit result(msg.sender, "win", 3);
+            emit result(address(this), msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
         } else if (
             PossiblePlays(_play) == PossiblePlays(1) &&
             algoPlay == PossiblePlays(0)
         ) {
-            emit result(msg.sender, "win", 3);
+            emit result(address(this), msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
         } else if (
             PossiblePlays(_play) == PossiblePlays(1) &&
             algoPlay == PossiblePlays(2)
         ) {
-            emit result(msg.sender, "loss", 0);
+            emit result(address(this), msg.sender, "loss", 0);
         } else if (
             PossiblePlays(_play) == PossiblePlays(2) &&
             algoPlay == PossiblePlays(0)
         ) {
-            emit result(msg.sender, "loss", 0);
+            emit result(address(this), msg.sender, "loss", 0);
         } else {
-            emit result(msg.sender, "win", 3);
+            emit result(address(this), msg.sender, "win", 3);
             scoreboard[msg.sender].points += 3;
         }
         scoreboard[msg.sender].numberOfPlays += 1;
@@ -179,5 +189,9 @@ contract EventGame {
         // chainlink VRF
         uint256 randomNumber = 0;
         return randomNumber;
+    }
+
+    function getScoreboard() public view returns (UserScore memory) {
+        return scoreboard[msg.sender];
     }
 }
