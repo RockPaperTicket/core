@@ -31,7 +31,7 @@ contract TicketMinter is ERC721URIStorage{
         _tokenIds.increment();
         newTokenId = _tokenIds.current();
         require(newTokenId <= numberOfTickets, "All Tickets have been sold out!");
-        //require(IeventLog(_eventAddress)._isWinner(_eventId, msg.sender) == true, "You are not qualified to receive a ticket.");
+        require(IeventLog(_eventAddress)._isWinner(_eventId, msg.sender) == true, "You are not qualified to receive a ticket.");
         require(balanceOf(msg.sender) == 0, 'Each player may only own one ticket');
         _setTokenURI(newTokenId, tokenURI);
         _safeMint(msg.sender, newTokenId);
