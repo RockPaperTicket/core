@@ -138,4 +138,34 @@ contract EventLog {
         //this visibility must be protected
         s_winners[_eventId][_winner] = true;
     }
+
+    function _isWinner(uint256 _eventId, address _userAddress)
+        external
+        view
+        returns (bool)
+    {
+        if (s_winners[_eventId][_userAddress] == true) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function _getEventName(uint256 _eventId)
+        external
+        view
+        returns (string memory)
+    {
+        string memory eventName = s_events[_eventId].eventName;
+        return eventName;
+    }
+
+    function _getNumberOfTickets(uint256 _eventId)
+        external
+        view
+        returns (uint256)
+    {
+        uint256 numberOfTickets = s_events[_eventId].numberOfTickets;
+        return numberOfTickets;
+    }
 }
