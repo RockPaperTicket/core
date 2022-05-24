@@ -5,8 +5,8 @@ pragma solidity 0.8.4;
 contract EventLog {
     // all events ever created are stored in these structures
     uint256 s_numberOfEvents;
+    uint256[] s_eventIds;
     mapping(uint256 => Event) s_events; // s_eventId => Event
-    mapping(uint256 => uint256) numberOfUsersRegistered;
 
     // every user events are stored as userAddress => Event
     mapping(address => uint256[]) s_registeredEvents;
@@ -16,14 +16,6 @@ contract EventLog {
     mapping(uint256 => mapping(address => bool)) s_winners;
 
     struct Event {
-        address eventGameAddress;
-        address eventOwner;
-        string eventName;
-        uint256 numberOfTickets;
-        uint256 ticketPrice;
-        bool isOpen;
-    }
-    struct EventWithTotalNumber {
         address eventGameAddress;
         address eventOwner;
         string eventName;
@@ -51,9 +43,11 @@ contract EventLog {
             _eventName,
             _numberOfTickets,
             _ticketPrice,
+            0,
             true
         );
         s_numberOfEvents += 1;
+        s_eventIds.push(_eventId);
     }
 
     function _updateName(uint256 _eventId, string memory _newName) external {
@@ -78,7 +72,7 @@ contract EventLog {
 
     function getOpenEvents() public view returns (Event[] memory) {
         uint256 availableLength = 0;
-        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+        for (uint256 i = 1; i <= s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
                 availableLength += 1;
             }
@@ -86,7 +80,7 @@ contract EventLog {
 
         Event[] memory openEvents = new Event[](availableLength);
         uint256 currentIndex = 0;
-        for (uint256 i = 0; i < s_numberOfEvents; i++) {
+        for (uint256 i = 1; i <= s_numberOfEvents; i++) {
             if (s_events[i].isOpen == true) {
                 openEvents[currentIndex] = s_events[i];
                 currentIndex += 1;
@@ -100,7 +94,7 @@ contract EventLog {
     {
         //this visibility must be protected
         s_registeredEvents[_userAddress].push(_eventId);
-        numberOfUsersRegistered[_eventId] += 1;
+        s_events[_eventId].totalUsers += 1;
     }
 
     function getRegisteredEvents(address _userAddress)
@@ -124,29 +118,18 @@ contract EventLog {
         s_createdEvents[_userAddress].push(_eventId);
     }
 
-    function getCreatedEvents()
+    function getCreatedEvents(address _userAddress)
         public
         view
-        returns (EventWithTotalNumber[] memory)
+        returns (Event[] memory)
     {
-        uint256[] memory createdEvents = s_createdEvents[msg.sender];
+        uint256[] memory createdEvents = s_createdEvents[_userAddress];
         uint256 availableLength = createdEvents.length;
-        EventWithTotalNumber[] memory createdEventsStruct = new EventWithTotalNumber[](availableLength);
+        Event[] memory createdEventsStruct = new Event[](availableLength);
         for (uint256 i = 0; i < availableLength; i++) {
             uint256 eventId = createdEvents[i];
             Event memory newEvent = s_events[eventId];
-            EventWithTotalNumber memory newCreatedEvent = EventWithTotalNumber(
-                {
-                    eventGameAddress: newEvent.eventGameAddress,
-                    eventOwner: newEvent.eventOwner,
-                    eventName: newEvent.eventName,
-                    numberOfTickets: newEvent.numberOfTickets,
-                    ticketPrice: newEvent.ticketPrice,
-                    isOpen: newEvent.isOpen,
-                    totalUsers: numberOfUsersRegistered[eventId]
-                }
-            );
-            createdEventsStruct[i] = newCreatedEvent;
+            createdEventsStruct[i] = newEvent;
         }
         return createdEventsStruct;
     }
