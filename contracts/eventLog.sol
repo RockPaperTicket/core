@@ -15,6 +15,12 @@ contract EventLog {
     // the winners of each event are stored as s_eventId => userAddress => true
     mapping(uint256 => mapping(address => bool)) s_winners;
 
+    enum GameStatus {
+        Registering,
+        Started,
+        Ended
+    }
+
     struct Event {
         address eventGameAddress;
         address eventOwner;
@@ -22,12 +28,14 @@ contract EventLog {
         uint256 numberOfTickets;
         uint256 ticketPrice;
         uint256 totalUsers;
-        bool isOpen;
+        GameStatus status;
     }
 
     constructor() {
         s_numberOfEvents = 0;
     }
+
+    event GameStarted(address indexed gameAddress, address indexed owner);
 
     function _logEvent(
         uint256 _eventId,
@@ -44,7 +52,7 @@ contract EventLog {
             _numberOfTickets,
             _ticketPrice,
             0,
-            true
+            GameStatus.Registering
         );
         s_numberOfEvents += 1;
         s_eventIds.push(_eventId);
@@ -62,8 +70,9 @@ contract EventLog {
         s_events[_eventId].ticketPrice = _newPrice;
     }
 
-    function _closeEvent(uint256 _eventId) external {
-        s_events[_eventId].isOpen = false;
+    function getEvent(uint256 _eventId) public view returns (Event memory) {
+        Event memory newEvent = s_events[_eventId];
+        return newEvent;
     }
 
     function getEventAddress(uint256 _eventId) public view returns (address) {
@@ -73,7 +82,7 @@ contract EventLog {
     function getOpenEvents() public view returns (Event[] memory) {
         uint256 availableLength = 0;
         for (uint256 i = 1; i <= s_numberOfEvents; i++) {
-            if (s_events[i].isOpen == true) {
+            if (s_events[i].status == GameStatus.Registering) {
                 availableLength += 1;
             }
         }
@@ -81,7 +90,7 @@ contract EventLog {
         Event[] memory openEvents = new Event[](availableLength);
         uint256 currentIndex = 0;
         for (uint256 i = 1; i <= s_numberOfEvents; i++) {
-            if (s_events[i].isOpen == true) {
+            if (s_events[i].status == GameStatus.Registering) {
                 openEvents[currentIndex] = s_events[i];
                 currentIndex += 1;
             }
@@ -134,23 +143,6 @@ contract EventLog {
         return createdEventsStruct;
     }
 
-    function _addWinner(uint256 _eventId, address _winner) external {
-        //this visibility must be protected
-        s_winners[_eventId][_winner] = true;
-    }
-
-    function _isWinner(uint256 _eventId, address _userAddress)
-        external
-        view
-        returns (bool)
-    {
-        if (s_winners[_eventId][_userAddress] == true) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     function _getEventName(uint256 _eventId)
         external
         view
@@ -167,5 +159,28 @@ contract EventLog {
     {
         uint256 numberOfTickets = s_events[_eventId].numberOfTickets;
         return numberOfTickets;
+    }
+
+    function _gameStart(uint256 _eventId) external {
+        s_events[_eventId].status = GameStatus.Started;
+        Event memory _event = s_events[_eventId];
+        emit GameStarted(_event.eventGameAddress, _event.eventOwner);
+    }
+
+    function _addWinner(uint256 _eventId, address _winner) external {
+        //this visibility must be protected
+        s_winners[_eventId][_winner] = true;
+    }
+
+    function _isWinner(uint256 _eventId, address _userAddress)
+        external
+        view
+        returns (bool)
+    {
+        if (s_winners[_eventId][_userAddress] == true) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

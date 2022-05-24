@@ -29,6 +29,8 @@ interface EventLog {
         external;
 
     function _addCreatedEvent(address _userAddress, uint256 _eventId) external;
+
+    function _gameStart(uint256 _eventId) external;
 }
 
 contract EventGame {
@@ -37,10 +39,13 @@ contract EventGame {
     address immutable s_owner;
     uint256 immutable s_eventId;
 
-    modifier onlyOwner() {
-        require(msg.sender == s_owner);
-        _;
+    enum GameStatus {
+        Registering,
+        Started,
+        Ended
     }
+
+    GameStatus public status;
 
     // constructor that defines all variables described above
     constructor(
@@ -54,8 +59,27 @@ contract EventGame {
         s_eventId = _eventId;
     }
 
+    modifier isRegistering() {
+        require(status == GameStatus.Registering);
+        _;
+    }
+
+    modifier isStarted() {
+        require(status == GameStatus.Started);
+        _;
+    }
+
+    modifier isEnded() {
+        require(status == GameStatus.Ended);
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == s_owner);
+        _;
+    }
+
     // registration and user-related variables
-    bool s_registrationOpen = true;
     address[] public s_registeredAddresses;
     mapping(address => bool) public s_isRegistered;
     mapping(address => UserScore) public scoreboard;
@@ -68,8 +92,8 @@ contract EventGame {
     // game-related variables
     uint256 timeLimit;
     enum PossiblePlays {
-        Paper,
         Rock,
+        Paper,
         Scissors
     }
 
@@ -82,29 +106,23 @@ contract EventGame {
     );
 
     // updates the event details
-
-    function test() public view onlyOwner returns (string memory) {
-        return "hello";
-    }
-
-    function updateName(string memory _newName) public onlyOwner {
+    function updateName(string memory _newName) public onlyOwner isRegistering {
         EventLog log = EventLog(s_logAddress);
         log._updateName(s_eventId, _newName);
     }
 
-    function updateTickets(uint256 _newTickets) public onlyOwner {
+    function updateTickets(uint256 _newTickets) public onlyOwner isRegistering {
         EventLog log = EventLog(s_logAddress);
         log._updateTickets(s_eventId, _newTickets);
     }
 
-    function updatePrice(uint256 _newPrice) public onlyOwner {
+    function updatePrice(uint256 _newPrice) public onlyOwner isRegistering {
         EventLog log = EventLog(s_logAddress);
         log._updatePrice(s_eventId, _newPrice);
     }
 
     // Registration of buyers => checks multi-registration
-    function register() public {
-        require(s_registrationOpen == true, "Registration not open yet!"); // ensure registration is open
+    function register() public isRegistering {
         require(
             s_isRegistered[msg.sender] == false,
             "You have already registered!"
@@ -117,26 +135,18 @@ contract EventGame {
         log._addRegisteredEvent(msg.sender, s_eventId);
     }
 
-    function startGame() public {
-        _closeRegistration;
-        timeLimit = block.timestamp + 1000000000000000;
-        _createGroups;
-    }
-
-    function _closeRegistration() private {
-        if (s_registrationOpen == true) {
-            s_registrationOpen = false;
-        }
+    function startGame() public isRegistering {
+        status = GameStatus.Started;
         EventLog log = EventLog(s_logAddress);
-        log._closeEvent(s_eventId);
+        log._gameStart(s_eventId);
+        timeLimit = block.timestamp + 1000000000000000;
+        _createGroups();
     }
 
     function _createGroups() private {}
 
-    function userPlay(uint256 _play) public {
+    function userPlay(uint256 _play) public isStarted {
         // its called by each user FE
-
-        require(s_registrationOpen == false);
         require(s_isRegistered[msg.sender] == true);
         require(scoreboard[msg.sender].numberOfPlays <= 5);
         require(block.timestamp < timeLimit);
