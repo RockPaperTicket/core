@@ -35,7 +35,17 @@ contract EventLog {
         s_numberOfEvents = 0;
     }
 
-    event GameStarted(address indexed gameAddress, address indexed owner);
+    event GameStarted(
+        address indexed gameAddress,
+        address indexed owner,
+        uint256 timeStarted
+    );
+
+    event GameEnded(
+        address indexed gameAddress,
+        address indexed owner,
+        uint256 timeStarted
+    );
 
     function _logEvent(
         uint256 _eventId,
@@ -167,7 +177,21 @@ contract EventLog {
     function _gameStart(uint256 _eventId) external {
         s_events[_eventId].status = GameStatus.Started;
         Event memory _event = s_events[_eventId];
-        emit GameStarted(_event.eventGameAddress, _event.eventOwner);
+        emit GameStarted(
+            _event.eventGameAddress,
+            _event.eventOwner,
+            block.timestamp
+        );
+    }
+
+    function _gameEnd(uint256 _eventId) external {
+        s_events[_eventId].status = GameStatus.Started;
+        Event memory _event = s_events[_eventId];
+        emit GameEnded(
+            _event.eventGameAddress,
+            _event.eventOwner,
+            block.timestamp
+        );
     }
 
     function _addWinner(uint256 _eventId, address _winner) external {
