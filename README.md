@@ -1,5 +1,3 @@
-# core
-
 ## Deployed contracts (KOVAN)
 
 eventLog deployed to: 0xDD65Cf1280C52A825B4997bC10E3ad688F6Feab3
