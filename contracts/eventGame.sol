@@ -31,6 +31,11 @@ interface EventLog {
     function _addCreatedEvent(address _userAddress, uint256 _eventId) external;
 
     function _gameStart(uint256 _eventId) external;
+
+    function _isWinner(uint256 _eventId, address _userAddress)
+        external
+        view
+        returns (bool);
 }
 
 contract EventGame {
@@ -203,5 +208,19 @@ contract EventGame {
 
     function getScoreboard() public view returns (UserScore memory) {
         return scoreboard[msg.sender];
+    }
+
+    function endGame() public {
+        status = GameStatus.Ended;
+    }
+
+    function isWinner(address _userAddress)
+        external
+        view
+        isEnded
+        returns (bool)
+    {
+        EventLog log = EventLog(s_logAddress);
+        return log._isWinner(s_eventId, _userAddress);
     }
 }

@@ -204,10 +204,6 @@ contract EventLog {
         view
         returns (bool)
     {
-        if (s_winners[_eventId][_userAddress] == true) {
-            return true;
-        } else {
-            return false;
-        }
+        return s_winners[_eventId][_userAddress];
     }
 }
