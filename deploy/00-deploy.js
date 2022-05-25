@@ -4,6 +4,10 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 
+//eventLog deployed to: 0xDD65Cf1280C52A825B4997bC10E3ad688F6Feab3
+//eventFactory deployed to: 0x8968d23FB3D852cB110BF6c38cbfCE299BE757FD
+//eventGame created at 0x67F7afEE5858BB10f562833009B73A763C3Fb974
+
 const hre = require("hardhat");
 
 async function main() {
@@ -13,12 +17,6 @@ async function main() {
     const eventLog = await EventLog.deploy();
     await eventLog.deployed();
     console.log("eventLog deployed to:", eventLog.address);
-
-    // DEPLOY EVENTGAME
-    //const EventGame = await hre.ethers.getContractFactory("EventGame");
-    //const eventGame = await EventGame.deploy(eventLog.address, "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", 0);
-    //await eventGame.deployed();
-    //console.log("eventGame deployed to:", eventGame.address);
 
     // DEPLOY FACTORY
     const EventFactory = await hre.ethers.getContractFactory("EventFactory");
@@ -33,8 +31,15 @@ async function main() {
     console.log("eventGame created at", newEventAddress);
 
     newEventGame = await ethers.getContractAt("EventGame", newEventAddress);
-    const result = await newEventGame.test();
-    console.log(result);
+
+    const eventName = await eventLog._getEventName(1);
+    console.log("event name is", eventName);
+
+    const numberOfTickets = await eventLog._getNumberOfTickets(1);
+    console.log("number of tickets is", numberOfTickets);
+
+    const isWinner = await eventLog._isWinner(1, "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+    console.log(isWinner)
 
 }
 
