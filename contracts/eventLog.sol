@@ -47,6 +47,10 @@ contract EventLog {
         uint256 timeStarted
     );
 
+    //
+    // LOG NEW EVENTS
+    //
+
     function _logEvent(
         uint256 _eventId,
         address _eventGameAddress,
@@ -68,6 +72,10 @@ contract EventLog {
         s_eventIds.push(_eventId);
     }
 
+    //
+    // UPDATE EVENTS
+    //
+
     function _updateName(uint256 _eventId, string memory _newName) external {
         require(msg.sender == s_events[_eventId].eventGameAddress);
         s_events[_eventId].eventName = _newName;
@@ -83,6 +91,10 @@ contract EventLog {
         s_events[_eventId].ticketPrice = _newPrice;
     }
 
+    //
+    //QUERY EVENTS INFO
+    //
+
     function getEvent(uint256 _eventId) public view returns (Event memory) {
         Event memory newEvent = s_events[_eventId];
         return newEvent;
@@ -91,6 +103,27 @@ contract EventLog {
     function getEventAddress(uint256 _eventId) public view returns (address) {
         return s_events[_eventId].eventGameAddress;
     }
+
+    function getEventName(uint256 _eventId)
+        external
+        view
+        returns (string memory)
+    {
+        return s_events[_eventId].eventName;
+    }
+
+    function getNumberOfTickets(uint256 _eventId)
+        external
+        view
+        returns (uint256)
+    {
+        uint256 numberOfTickets = s_events[_eventId].numberOfTickets;
+        return numberOfTickets;
+    }
+
+    //
+    // GET OPEN EVENTS
+    //
 
     function getOpenEvents() public view returns (Event[] memory) {
         uint256 availableLength = 0;
@@ -111,6 +144,7 @@ contract EventLog {
         return openEvents;
     }
 
+    // ADD AND GET REGISTERED/CREATED EVENTS
     function _addRegisteredEvent(address _userAddress, uint256 _eventId)
         external
     {
@@ -156,23 +190,9 @@ contract EventLog {
         return createdEventsStruct;
     }
 
-    function _getEventName(uint256 _eventId)
-        external
-        view
-        returns (string memory)
-    {
-        string memory eventName = s_events[_eventId].eventName;
-        return eventName;
-    }
-
-    function _getNumberOfTickets(uint256 _eventId)
-        external
-        view
-        returns (uint256)
-    {
-        uint256 numberOfTickets = s_events[_eventId].numberOfTickets;
-        return numberOfTickets;
-    }
+    //
+    // CHANGE GAME STATUS
+    //
 
     function _gameStart(uint256 _eventId) external {
         s_events[_eventId].status = GameStatus.Started;
@@ -193,6 +213,10 @@ contract EventLog {
             block.timestamp
         );
     }
+
+    //
+    // ADD AND CHECK WINNERS
+    //
 
     function _addWinner(uint256 _eventId, address _winner) external {
         //this visibility must be protected

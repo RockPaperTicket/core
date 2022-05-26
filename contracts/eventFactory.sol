@@ -8,10 +8,12 @@ import "./eventGame.sol";
 
 contract EventFactory {
     address immutable s_logAddress;
+    address immutable s_vrfAddress;
     uint256 s_nextId;
 
-    constructor(address _logAddress) {
+    constructor(address _logAddress, address _vrfAddress) {
         s_logAddress = _logAddress;
+        s_vrfAddress = _vrfAddress;
         s_nextId = 1;
     }
 
@@ -20,9 +22,14 @@ contract EventFactory {
         string memory _eventName,
         uint256 _numberOfTickets,
         uint256 _ticketPrice
-    ) external returns (address) {
+    ) external {
         EventLog log = EventLog(s_logAddress);
-        EventGame game = new EventGame(s_logAddress, msg.sender, s_nextId);
+        EventGame game = new EventGame(
+            s_logAddress,
+            s_vrfAddress,
+            msg.sender,
+            s_nextId
+        );
         log._logEvent(
             s_nextId,
             address(game),

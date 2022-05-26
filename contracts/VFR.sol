@@ -17,18 +17,18 @@ contract VRF is VRFConsumerBaseV2 {
     uint64 constant SUBSCRIPTION_ID = 4894;
     uint32 constant CALLBACK_GAS_LIMIT = 100000; // max gas amoung willing to pay to receive the number
     uint16 constant REQUEST_CONFIRMATIONS = 3; // how many confirmationts we want to wait to consider the transaction completed
-    uint32 constant NUM_WORDS = 1; // number of values that we want to get
+    uint32 constant NUM_WORDS = 5; // number of values that we want to get
     uint256 constant MAX_VALUE = 2; // maximum value we want to get
 
     //variables no definides en aquest contracte:
-    uint256 public s_randomWords;
+    uint256[] s_randomWords;
     uint256 public s_requestId;
 
     constructor() VRFConsumerBaseV2(VRF_COORDINATOR) {
         i_vrfCoordinator = VRFCoordinatorV2Interface(VRF_COORDINATOR);
     }
 
-    function requestRandomWords() public {
+    function requestRandomWords() external {
         s_requestId = i_vrfCoordinator.requestRandomWords(
             GAS_LANE,
             SUBSCRIPTION_ID,
@@ -43,6 +43,12 @@ contract VRF is VRFConsumerBaseV2 {
         internal
         override
     {
-        s_randomWords = randomWords[0]; // we will get a number between 0-2
+        for (uint256 i = 0; i < MAX_VALUE; i++) {
+            s_randomWords[i] = randomWords[i] % MAX_VALUE; // we will get a number between 0-2
+        }
+    }
+
+    function _getRandomNumber(uint256 _playId) external view returns (uint256) {
+        return s_randomWords[_playId];
     }
 }
