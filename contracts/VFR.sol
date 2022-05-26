@@ -51,4 +51,12 @@ contract VRF is VRFConsumerBaseV2 {
     function _getRandomNumber(uint256 _playId) external view returns (uint256) {
         return s_randomWords[_playId];
     }
+
+    function _haveNumbers() external view returns (bool) {
+        if (s_randomWords.length == 3) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

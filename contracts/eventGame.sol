@@ -56,7 +56,7 @@ contract EventGame {
     address immutable s_logAddress;
     address immutable s_vrfAddress;
     address immutable s_owner;
-    uint256 immutable s_eventId;
+    uint256 public immutable s_eventId;
 
     enum GameStatus {
         Registering,
@@ -240,7 +240,7 @@ contract EventGame {
         uint256 playId = scoreboard[msg.sender].numberOfPlays;
         require(s_isRegistered[msg.sender] == true, "You are not registered!");
         require(playId <= 5, "You have already made all your plays!");
-        require(block.timestamp < timeLimit, "The game is already ended!");
+        //require(block.timestamp < timeLimit, "The game is alredy finished");
         PossiblePlays algoPlay = _getAlgoPlay(playId);
         if (PossiblePlays(_play) == algoPlay) {
             emit result(address(this), msg.sender, "draw", 1);
