@@ -10,7 +10,7 @@ interface IeventGame {
     function _isWinner(uint256 _eventId, address _userAddress) external view returns (bool);
     function getNumberOfTickets(uint256 _eventId) external view returns (uint256);
     function getEventName(uint256 _eventId) external view returns (string memory);
-    function _eventId() external returns (uint256);
+    function getEventId() external view returns (uint256);
 }
 
 contract TicketMinter is ERC721URIStorage{
@@ -33,7 +33,7 @@ contract TicketMinter is ERC721URIStorage{
         newTokenId = _tokenIds.current();
 
         // access necessary information for the ticket
-        uint256 _eventId = IeventGame(_eventAddress)._eventId();
+        uint256 _eventId = IeventGame(_eventAddress).getEventId();
         uint256 numberOfTickets = IeventGame(_eventAddress).getNumberOfTickets(_eventId);
         string memory eventName = IeventGame(_eventAddress).getEventName(_eventId);
 
