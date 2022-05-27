@@ -13,9 +13,9 @@ contract VRF is VRFConsumerBaseV2 {
     address constant VRF_COORDINATOR =
         0x6168499c0cFfCaCD319c818142124B7A15E857ab;
     bytes32 constant GAS_LANE =
-        0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // =keyHash --> max gas price willing to pay for the request
+        0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f; // =keyHash --> max gas price willing to pay for the request
     uint64 constant SUBSCRIPTION_ID = 4894;
-    uint32 constant CALLBACK_GAS_LIMIT = 100000; // max gas amoung willing to pay to receive the number
+    uint32 constant CALLBACK_GAS_LIMIT = 1000000; // max gas amoung willing to pay to receive the number
     uint16 constant REQUEST_CONFIRMATIONS = 3; // how many confirmationts we want to wait to consider the transaction completed
     uint32 constant NUM_WORDS = 5; // number of values that we want to get
     uint256 constant MAX_VALUE = 2; // maximum value we want to get

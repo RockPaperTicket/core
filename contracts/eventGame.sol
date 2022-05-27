@@ -131,7 +131,7 @@ contract EventGame {
     // UPDATE EVENTS
     //
 
-    function _eventId() external returns (uint256) {
+    function getEventId() external view returns (uint256) {
         return s_eventId;
     }
 
@@ -174,9 +174,9 @@ contract EventGame {
 
     // Random numbers generation is called in this function (VRF node calls)
     function startGame() public isRegistering {
-        status = GameStatus.Started;
-        VRF vrf = VRF(s_vrfAddress);
-        vrf.requestRandomWords();
+        //status = GameStatus.Started; //functionality checked
+        //VRF vrf = VRF(s_vrfAddress);
+        //vrf.requestRandomWords();
         EventLog log = EventLog(s_logAddress);
         uint256 numberOfTickets = log.getNumberOfTickets(s_eventId);
         uint256 numberOfPlayers = s_registeredAddresses.length;
@@ -187,7 +187,7 @@ contract EventGame {
         }
         log._gameStart(s_eventId);
         timeLimit = block.timestamp + 1000000000000000;
-        _createGroups();
+        //_createGroups();
     }
 
     // Groups are created when the game is started
@@ -235,12 +235,13 @@ contract EventGame {
     // GAME MECHANICS --> some time has to pass so that random numbers are generated!
     //
 
-    function userPlay(uint256 _play) public isStarted {
-        VRF vrf = VRF(s_vrfAddress);
-        require(
-            vrf._haveNumbers(),
-            "Calculating algorithmic play, please wait..."
-        );
+    function userPlay(uint256 _play) public {
+        //isStarted {
+        //VRF vrf = VRF(s_vrfAddress);
+        //require(
+        //    vrf._haveNumbers(),
+        //    "Calculating algorithmic play, please wait..."
+        //);
         uint256 playId = scoreboard[msg.sender].numberOfPlays;
         require(s_isRegistered[msg.sender] == true, "You are not registered!");
         require(playId <= 5, "You have already made all your plays!");
@@ -284,15 +285,13 @@ contract EventGame {
         scoreboard[msg.sender].timeElapsed += block.timestamp;
     }
 
-    function _getAlgoPlay(uint256 _playId)
-        private
-        view
-        returns (PossiblePlays)
-    {
-        VRF vrf = VRF(s_vrfAddress);
-        uint256 randomNum = vrf._getRandomNumber(_playId);
-        PossiblePlays algoPlay = PossiblePlays(randomNum);
-        //PossiblePlays algoPlay = PossiblePlays(1);
+    function _getAlgoPlay(
+        uint256 _playId //must be changed back to private
+    ) public view returns (PossiblePlays) {
+        //VRF vrf = VRF(s_vrfAddress);
+        //uint256 randomNum = vrf._getRandomNumber(_playId);
+        //PossiblePlays algoPlay = PossiblePlays(randomNum);
+        PossiblePlays algoPlay = PossiblePlays(1);
         return algoPlay;
     }
 
@@ -403,12 +402,7 @@ contract EventGame {
         return scoreboard[msg.sender];
     }
 
-    function isWinner(address _userAddress)
-        external
-        view
-        isEnded
-        returns (bool)
-    {
+    function isWinner(address _userAddress) external view returns (bool) {
         EventLog log = EventLog(s_logAddress);
         return log._isWinner(s_eventId, _userAddress);
     }
