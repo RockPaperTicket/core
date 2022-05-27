@@ -295,7 +295,7 @@ contract EventGame {
     // FINISH THE GAME & SET THE WINNERS
     //
 
-    function endGame() public {
+    function endGame() public isStarted {
         status = GameStatus.Ended;
         _setWinners(); // this function is incomplete
     }
