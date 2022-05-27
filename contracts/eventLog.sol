@@ -148,7 +148,7 @@ contract EventLog {
     function _addRegisteredEvent(address _userAddress, uint256 _eventId)
         external
     {
-        //this visibility must be protected
+        require(msg.sender == s_events[_eventId].eventGameAddress);
         s_registeredEvents[_userAddress].push(_eventId);
         s_events[_eventId].totalUsers += 1;
     }
@@ -170,7 +170,7 @@ contract EventLog {
     }
 
     function _addCreatedEvent(address _userAddress, uint256 _eventId) external {
-        //this visibility must be protected
+        require(msg.sender == s_events[_eventId].eventGameAddress);
         s_createdEvents[_userAddress].push(_eventId);
     }
 
@@ -195,6 +195,8 @@ contract EventLog {
     //
 
     function _gameStart(uint256 _eventId) external {
+        require(msg.sender == s_events[_eventId].eventGameAddress);
+        require(s_events[_eventId].status == GameStatus.Registering);
         s_events[_eventId].status = GameStatus.Started;
         Event memory _event = s_events[_eventId];
         emit GameStarted(
@@ -205,7 +207,9 @@ contract EventLog {
     }
 
     function _gameEnd(uint256 _eventId) external {
-        s_events[_eventId].status = GameStatus.Started;
+        require(msg.sender == s_events[_eventId].eventGameAddress);
+        require(s_events[_eventId].status == GameStatus.Started);
+        s_events[_eventId].status = GameStatus.Ended;
         Event memory _event = s_events[_eventId];
         emit GameEnded(
             _event.eventGameAddress,
@@ -219,7 +223,7 @@ contract EventLog {
     //
 
     function _addWinner(uint256 _eventId, address _winner) external {
-        //this visibility must be protected
+        require(msg.sender == s_events[_eventId].eventGameAddress);
         s_winners[_eventId][_winner] = true;
     }
 
