@@ -174,7 +174,7 @@ contract EventGame {
 
     // Random numbers generation is called in this function (VRF node calls)
     function startGame() public isRegistering {
-        //status = GameStatus.Started; //functionality checked
+        status = GameStatus.Started;
         //VRF vrf = VRF(s_vrfAddress);
         //vrf.requestRandomWords();
         EventLog log = EventLog(s_logAddress);
