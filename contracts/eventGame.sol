@@ -131,6 +131,10 @@ contract EventGame {
     // UPDATE EVENTS
     //
 
+    function _eventId() external returns (uint256) {
+        return s_eventId;
+    }
+
     function updateName(string memory _newName) public onlyOwner isRegistering {
         EventLog log = EventLog(s_logAddress);
         log._updateName(s_eventId, _newName);
@@ -288,6 +292,7 @@ contract EventGame {
         VRF vrf = VRF(s_vrfAddress);
         uint256 randomNum = vrf._getRandomNumber(_playId);
         PossiblePlays algoPlay = PossiblePlays(randomNum);
+        //PossiblePlays algoPlay = PossiblePlays(1);
         return algoPlay;
     }
 

@@ -170,7 +170,7 @@ contract EventLog {
     }
 
     function _addCreatedEvent(address _userAddress, uint256 _eventId) external {
-        require(msg.sender == s_events[_eventId].eventGameAddress);
+        //require(msg.sender == s_events[_eventId].eventGameAddress);
         s_createdEvents[_userAddress].push(_eventId);
     }
 
